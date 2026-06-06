@@ -34,27 +34,60 @@ export type SolutionClusterTag =
   | "automation_rnd"
   | "automation_production_logistics";
 
+/**
+ * UseCase = aktuelles Produktmodell des Produktkatalogs.
+ *
+ * Feld-Klassifikation (Stand Phase 2, siehe MIGRATION_NOTES.md):
+ *  - ZWINGEND:      id, domain, title, short, solution_cluster, outputs, tags.intent
+ *  - UX-RELEVANT:   priority, tags.data_scope, details.problem/typicalResult/bestFor
+ *  - STRAPI/SEO:    slug
+ *  - REDUNDANT/LEGACY (nur von entferntem Alt-Flow genutzt -> kann später entfallen):
+ *                   portfolio_area, tags.complexity, tags.tech_hint,
+ *                   tags.maturity_hint, details.typicalDeliverables
+ *
+ * Hinweis: Legacy-Felder bleiben vorerst im Interface (optional bzw. tolerant),
+ * damit die ~100 bestehenden Datensätze ohne riskanten Massen-Edit weiter valide sind.
+ * Beim Schritt UseCase -> Product (productModel.ts) werden sie nicht übernommen.
+ */
 export interface UseCase {
+  /** ZWINGEND – stabiler Schlüssel / künftige Product.id */
   id: string;
+  /** STRAPI/SEO – optionaler URL-Slug, derzeit nicht aktiv gerendert */
   slug?: string;
+  /** ZWINGEND – Fachdomäne, steuert UI-Cluster-Zuordnung */
   domain: UseCaseDomain;
+  /** ZWINGEND – Anzeigetitel */
   title: string;
-  short: string; // 1–2 Zeilen, kundenverständlich
+  /** ZWINGEND – Kurzbeschreibung (1–2 Zeilen, kundenverständlich) */
+  short: string;
+  /** @deprecated LEGACY – nur vom alten Portfolio-Flow genutzt, kann später entfallen */
   portfolio_area?: PortfolioAreaTag;
+  /** ZWINGEND (faktisch) – primäres Cluster für Navigation/Empfehlung */
   solution_cluster?: SolutionClusterTag;
+  /** UX-RELEVANT – hebt Fokus-/Featured-Use-Cases hervor */
   priority?: "green" | "normal";
   tags: {
+    /** ZWINGEND – treibt Suche + Rule-Engine */
     intent: IntentTag[];
+    /** UX-/LOGIK-RELEVANT – treibt Architektur-Empfehlungen */
     data_scope: DataScopeTag;
+    /** @deprecated LEGACY – nur Badge im alten Flow, kann später entfallen */
     complexity: ComplexityTag;
+    /** @deprecated LEGACY – im aktiven Flow ungenutzt, kann später entfallen */
     maturity_hint: MaturityHintTag;
+    /** @deprecated LEGACY – nur Badge im alten Flow, kann später entfallen */
     tech_hint: TechHintTag[];
   };
-  outputs: string[]; // 3 bullets
+  /** ZWINGEND – Ergebnis-Bullets (im Paket-View gerendert) */
+  outputs: string[];
   details?: {
+    /** UX-RELEVANT */
     problem: string;
+    /** UX-RELEVANT */
     typicalResult: string;
+    /** @deprecated LEGACY – im aktiven Flow ungenutzt (Bausteine kommen aus recommendations.ts) */
     typicalDeliverables: string[];
+    /** UX-RELEVANT */
     bestFor: string[];
   };
 }
@@ -86,7 +119,7 @@ const rawUseCases: UseCase[] = [
     id: "ki-strategie",
     domain: "general_mgmt",
     title: "KI Strategie",
-    short: "Definition einer pragmatischen KI-Strategie mit priorisierten Use Cases, Risiken und klarer Umsetzungsplanung.",
+    short: "Definition einer pragmatischen KI-Strategie mit priorisierten Anwendungsfällen, Risiken und klarer Umsetzungsplanung.",
     portfolio_area: "solutions",
     solution_cluster: "orientation_prioritization",
     priority: "green",
@@ -301,7 +334,7 @@ const rawUseCases: UseCase[] = [
     id: "datenstrategie-erstellung",
     domain: "general_mgmt",
     title: "Datenstrategie Erstellung",
-    short: "Variante zur Datenstrategie mit stärkerem Fokus auf initiale Dokumentation und strategische Grundsatzarbeit.",
+    short: "Datenstrategie mit stärkerem Fokus auf initiale Dokumentation und strategische Grundsatzarbeit.",
     tags: {
       intent: ["scale"],
       data_scope: "enterprise_wide",
@@ -546,7 +579,7 @@ const rawUseCases: UseCase[] = [
     id: "setup-data-infrastructure",
     domain: "it_data",
     title: "Setup Data Infrastructure",
-    short: "Variante mit Fokus auf initiales Plattform-Setup und technische Inbetriebnahme der Dateninfrastruktur.",
+    short: "Initiales Plattform-Setup und technische Inbetriebnahme der Dateninfrastruktur.",
     tags: {
       intent: ["scale"],
       data_scope: "multi_source",
@@ -585,7 +618,7 @@ const rawUseCases: UseCase[] = [
     id: "helpdesk-automation",
     domain: "it_data",
     title: "Intelligentes Ticket-Routing",
-    short: "Primary-Use-Case für automatische Priorisierung und Verteilung von Tickets auf passende Teams.",
+    short: "Automatische Priorisierung und Verteilung von Tickets auf passende Teams.",
     portfolio_area: "automation_ai",
     solution_cluster: "automation_it_ops",
     priority: "green",
@@ -645,7 +678,7 @@ const rawUseCases: UseCase[] = [
     id: "data-warehouse-implementierung",
     domain: "it_data",
     title: "Data Warehouse Implementierung",
-    short: "Variante mit Fokus auf technische DWH-Implementierung inkl. ETL und operativer Datenbereitstellung.",
+    short: "Technische DWH-Implementierung inkl. ETL und operativer Datenbereitstellung.",
     tags: {
       intent: ["scale"],
       data_scope: "enterprise_wide",
@@ -1060,7 +1093,7 @@ const rawUseCases: UseCase[] = [
     id: "quality-assurance-ai",
     domain: "production",
     title: "Ausschuss- und Qualitätscontrolling",
-    short: "Primary-Use-Case für KI-gestützte Qualitätsautomatisierung mit Fokus auf Ausschussreduktion im Produktionsablauf.",
+    short: "KI-gestützte Qualitätsautomatisierung mit Fokus auf Ausschussreduktion im Produktionsablauf.",
     portfolio_area: "automation_ai",
     solution_cluster: "automation_production_logistics",
     priority: "green",
@@ -1615,7 +1648,7 @@ const rawUseCases: UseCase[] = [
     id: "ai-helpdeskassistent",
     domain: "it_data",
     title: "AI-Helpdeskassistent",
-    short: "Variante für KI-Assistenz im Agentenarbeitsplatz mit Lösungsvorschlägen für wiederkehrende IT-Anfragen.",
+    short: "KI-Assistenz im Agentenarbeitsplatz mit Lösungsvorschlägen für wiederkehrende IT-Anfragen.",
     portfolio_area: "automation_ai",
     solution_cluster: "automation_it_ops",
     priority: "green",
@@ -1637,7 +1670,7 @@ const rawUseCases: UseCase[] = [
     id: "self-service-helpdesk",
     domain: "it_data",
     title: "Self-Service Helpdesk",
-    short: "Variante mit Fokus auf nutzerseitige Selbsthilfe über Portal und automatisierte Lösungspfade.",
+    short: "Nutzerseitige Selbsthilfe über Portal und automatisierte Lösungspfade.",
     portfolio_area: "automation_ai",
     solution_cluster: "automation_it_ops",
     priority: "green",
@@ -1736,7 +1769,7 @@ const rawUseCases: UseCase[] = [
     id: "ai-video-qualitaetsanalyse",
     domain: "production",
     title: "AI-Video-Qualitätsanalyse",
-    short: "Variante zur Qualitätsautomatisierung mit Schwerpunkt auf visueller Inspektion per Video- und Bilddaten.",
+    short: "Qualitätsautomatisierung mit Schwerpunkt auf visueller Inspektion per Video- und Bilddaten.",
     portfolio_area: "automation_ai",
     solution_cluster: "automation_production_logistics",
     priority: "green",
@@ -1758,7 +1791,7 @@ const rawUseCases: UseCase[] = [
     id: "objekterkennung",
     domain: "production",
     title: "Objekterkennung",
-    short: "Variante mit Fokus auf generische Computer-Vision-Erkennung als Baustein für Qualitäts- und Logistikprozesse.",
+    short: "Generische Computer-Vision-Erkennung als Baustein für Qualitäts- und Logistikprozesse.",
     portfolio_area: "automation_ai",
     solution_cluster: "automation_production_logistics",
     priority: "green",
@@ -1946,7 +1979,7 @@ export const useCases: UseCase[] = rawUseCases.map((useCase) => {
     useCase.portfolio_area ?? (resolvedCluster.startsWith("automation_") ? "automation_ai" : "solutions");
   const details = useCase.details ?? {
     problem: useCase.short,
-    typicalResult: useCase.outputs[0] ?? "Messbarer Mehrwert durch einen klar priorisierten Use Case.",
+    typicalResult: useCase.outputs[0] ?? "Messbarer Mehrwert durch ein klar priorisiertes Produkt.",
     typicalDeliverables: useCase.outputs.slice(0, 3),
     bestFor: defaultBestForByDomain[useCase.domain],
   };

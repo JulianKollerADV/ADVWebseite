@@ -1,6 +1,6 @@
 /* ============================================
-   ADV Produktkatalog – Scoped styles for /demo
-   Imported ONLY in src/pages/demo.astro.
+   ADV Produktkatalog – Scoped styles
+   Imported in src/pages/produktkatalog.astro (und Legacy src/pages/demo.astro).
    All selectors MUST be under .adv-catalog.
    Follows site conventions: @layer components / utilities.
    Uses existing ADV tokens — no new token definitions.
@@ -60,9 +60,20 @@
     outline-color: rgb(74 222 128); /* green-400 */
   }
 
-  /* ─ Sheet / Drawer — ensure above TopBar ─ */
+  /* ─ Catalog toolbar: below site header, above page content ─ */
+  .adv-catalog .catalog-toolbar {
+    position: sticky;
+    top: 5.5rem;
+    z-index: 20;
+  }
+
+  /* ─ Sheets / drawers above site header (z-30) ─ */
   .adv-catalog .fixed.inset-0 {
-    z-index: 50;
+    z-index: 60 !important;
+  }
+
+  .adv-catalog .catalog-sheet {
+    z-index: 61 !important;
   }
 
   /* ─ Finder Panel — items need breathing room ─ */

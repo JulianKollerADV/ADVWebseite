@@ -310,13 +310,13 @@ const hardOverrides: Record<string, Recommendation[]> = {
     },
     {
       deliverableId: "strategy_sprint",
-      defaultEnabled: false,
-      reason: "Leadership-Rahmen fuer Data & AI ausarbeiten (Coming Soon)"
+      defaultEnabled: true,
+      reason: "Leadership-Rahmen fuer Data & AI ausarbeiten"
     },
     {
       deliverableId: "roadmap",
-      defaultEnabled: false,
-      reason: "Transformation in klare Schritte uebersetzen (Coming Soon)"
+      defaultEnabled: true,
+      reason: "Transformation in klare Schritte uebersetzen"
     }
   ],
 
@@ -354,7 +354,7 @@ const hardOverrides: Record<string, Recommendation[]> = {
     {
       deliverableId: "target_architecture",
       defaultEnabled: false,
-      reason: "Zielbild fuer skalierbare Lake-Architektur ausarbeiten (Coming Soon)"
+      reason: "Zielbild fuer skalierbare Lake-Architektur ausarbeiten"
     }
   ],
 
@@ -362,8 +362,8 @@ const hardOverrides: Record<string, Recommendation[]> = {
   "enterprise-architecture-management": [
     {
       deliverableId: "target_architecture",
-      defaultEnabled: false,
-      reason: "EAM-Zielbild und Prinzipien definieren (Coming Soon)"
+      defaultEnabled: true,
+      reason: "EAM-Zielbild und Prinzipien definieren"
     },
     {
       deliverableId: "source_integration_review",
@@ -514,8 +514,8 @@ const hardOverrides: Record<string, Recommendation[]> = {
   "dsgvo-dsb": [
     {
       deliverableId: "governance_starter",
-      defaultEnabled: false,
-      reason: "Datenschutz-Governance mit Rollen und Prozessen aufsetzen (Coming Soon)"
+      defaultEnabled: true,
+      reason: "Datenschutz-Governance mit Rollen und Prozessen aufsetzen"
     },
     {
       deliverableId: "glossary_sprint",
@@ -525,7 +525,7 @@ const hardOverrides: Record<string, Recommendation[]> = {
     {
       deliverableId: "iam_concept",
       defaultEnabled: false,
-      reason: "Zugriffssteuerung fuer personenbezogene Daten absichern (Coming Soon)"
+      reason: "Zugriffssteuerung fuer personenbezogene Daten absichern"
     }
   ],
 
@@ -533,13 +533,13 @@ const hardOverrides: Record<string, Recommendation[]> = {
   "isms-isb-bestellung": [
     {
       deliverableId: "governance_starter",
-      defaultEnabled: false,
-      reason: "ISMS-nahe Governance-Struktur schaffen (Coming Soon)"
+      defaultEnabled: true,
+      reason: "ISMS-nahe Governance-Struktur schaffen"
     },
     {
       deliverableId: "iam_concept",
       defaultEnabled: false,
-      reason: "ISMS-relevante Zugriffskontrollen konzipieren (Coming Soon)"
+      reason: "ISMS-relevante Zugriffskontrollen konzipieren"
     },
     {
       deliverableId: "kpi_ws",
@@ -552,13 +552,13 @@ const hardOverrides: Record<string, Recommendation[]> = {
   "iam": [
     {
       deliverableId: "iam_concept",
-      defaultEnabled: false,
-      reason: "IAM-Zielbild und Rollenmodell strukturieren (Coming Soon)"
+      defaultEnabled: true,
+      reason: "IAM-Zielbild und Rollenmodell strukturieren"
     },
     {
       deliverableId: "roles_rights_impl",
       defaultEnabled: false,
-      reason: "Technische Umsetzung von Rollen und Rechten vorbereiten (Coming Soon)"
+      reason: "Technische Umsetzung von Rollen und Rechten vorbereiten"
     },
     {
       deliverableId: "source_integration_review",
@@ -1004,6 +1004,18 @@ function deduplicateAndPrioritize(recommendations: Recommendation[]): Recommenda
 }
 
 /**
+ * Nur aktive Bausteine; „Coming Soon“ aus Begründungstext entfernen.
+ */
+function toActiveRecommendations(recommendations: Recommendation[]): Recommendation[] {
+  return recommendations
+    .filter((rec) => Boolean(getDeliverableById(rec.deliverableId)?.active))
+    .map((rec) => ({
+      ...rec,
+      reason: rec.reason.replace(/\s*\(Coming Soon\)/gi, "").trim(),
+    }));
+}
+
+/**
  * Hauptfunktion: Gibt Bundle für Use Case zurück
  */
 export function getBundleForUseCase(useCaseId: string): Recommendation[] {
@@ -1027,17 +1039,17 @@ export function getBundleForUseCase(useCaseId: string): Recommendation[] {
 
   // Prüfe Hard Override
   if (hardOverrides[useCaseId]) {
-    const recommendations = deduplicateAndPrioritize(hardOverrides[useCaseId])
-      .filter((rec) => Boolean(getDeliverableById(rec.deliverableId)))
-      .slice(0, 3);
-    return recommendations.length > 0 ? recommendations : fallbackBundle;
+    const recommendations = toActiveRecommendations(
+      deduplicateAndPrioritize(hardOverrides[useCaseId])
+    ).slice(0, 6);
+    return recommendations.length > 0 ? recommendations : toActiveRecommendations(fallbackBundle);
   }
 
   // Fallback: Rule Engine
-  const recommendations = deduplicateAndPrioritize(generateRecommendationsFromRules(useCaseId))
-    .filter((rec) => Boolean(getDeliverableById(rec.deliverableId)))
-    .slice(0, 3);
-  return recommendations.length > 0 ? recommendations : fallbackBundle;
+  const recommendations = toActiveRecommendations(
+    deduplicateAndPrioritize(generateRecommendationsFromRules(useCaseId))
+  ).slice(0, 6);
+  return recommendations.length > 0 ? recommendations : toActiveRecommendations(fallbackBundle);
 }
 
 /**

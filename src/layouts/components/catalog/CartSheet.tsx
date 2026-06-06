@@ -28,7 +28,6 @@ export function CartSheet({ open, onOpenChange, onGoToConfig }: CartSheetProps) 
   const activeUseCase = useConfigStore((state) => state.activeUseCase);
   const selectedUseCases = useConfigStore((state) => state.selectedUseCases);
   const toggleDeliverable = useConfigStore((state) => state.toggleDeliverable);
-  const [copied, setCopied] = useState(false);
   const [copiedInquiry, setCopiedInquiry] = useState(false);
   const cartWithPrices = useMemo(
     () => getCartWithPricesFromSelectedDeliverables(selectedDeliverables),
@@ -41,20 +40,6 @@ export function CartSheet({ open, onOpenChange, onGoToConfig }: CartSheetProps) 
 
   const handleRemove = (deliverableId: string) => {
     toggleDeliverable(deliverableId, false);
-  };
-
-  const handleCopyConfiguration = () => {
-    const config = useConfigStore.getState();
-    const configJson = JSON.stringify({
-      selectedUseCases: config.selectedUseCases,
-      selectedDeliverables: config.selectedDeliverables,
-      totalPrice: totalPrice
-    }, null, 2);
-
-    navigator.clipboard.writeText(configJson).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
   };
 
   const getResolvedUseCaseTitle = () => {
@@ -155,7 +140,7 @@ export function CartSheet({ open, onOpenChange, onGoToConfig }: CartSheetProps) 
                 Warenkorb ist leer
               </p>
               <p className="text-xs text-text-light dark:text-darkmode-text-light">
-                Wählen Sie einen Use Case aus, um mit der Konfiguration zu beginnen.
+                Wählen Sie ein Produkt aus, um mit der Konfiguration zu beginnen.
               </p>
             </div>
           ) : (
@@ -312,24 +297,6 @@ export function CartSheet({ open, onOpenChange, onGoToConfig }: CartSheetProps) 
                   <>
                     <Copy className="h-4 w-4 mr-2" />
                     Anfrage kopieren
-                  </>
-                )}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleCopyConfiguration}
-                className="w-full"
-                size="sm"
-              >
-                {copied ? (
-                  <>
-                    <Check className="h-4 w-4 mr-2" />
-                    Kopiert!
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-4 w-4 mr-2" />
-                    Konfiguration kopieren
                   </>
                 )}
               </Button>

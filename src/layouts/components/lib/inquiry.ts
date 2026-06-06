@@ -22,9 +22,9 @@ export function buildInquiryText(payload: InquiryPayload): string {
   lines.push("");
   lines.push("ich möchte eine Anfrage zu folgender Konfiguration aus dem Produktkatalog stellen:");
   lines.push("");
-  lines.push(`Use Case: ${payload.useCaseTitle}`);
+  lines.push(`Produkt: ${payload.useCaseTitle}`);
   lines.push("");
-  lines.push("Ausgewählte Bausteine:");
+  lines.push("Ausgewählte Produktbausteine:");
 
   payload.deliverables.forEach((item, index) => {
     lines.push(`${index + 1}. ${item.name} (${formatPrice(item.price)})`);
@@ -54,4 +54,39 @@ export function buildInquiryText(payload: InquiryPayload): string {
 
 export function buildMailtoLink(email: string, subject: string, body: string): string {
   return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+export interface CustomInquiryFields {
+  companySize: string;
+  situation: string;
+  goal: string;
+  systems: string;
+  notes: string;
+}
+
+/** Freitext-Anfrage für custom/hybrid-Produkte (individuelle Anfrage). */
+export function buildCustomInquiryText(
+  productTitle: string,
+  fields: CustomInquiryFields,
+  isAddon = false
+): string {
+  const lines: string[] = [];
+  lines.push("Guten Tag,");
+  lines.push("");
+  lines.push(
+    isAddon
+      ? `ich interessiere mich für „${productTitle}“ und möchte eine individuelle Ergänzung anfragen:`
+      : `ich möchte eine individuelle Anfrage zu „${productTitle}“ stellen:`
+  );
+  lines.push("");
+  lines.push(`Unternehmensgröße: ${fields.companySize || "—"}`);
+  lines.push(`Ausgangssituation: ${fields.situation || "—"}`);
+  lines.push(`Ziel / gewünschtes Ergebnis: ${fields.goal || "—"}`);
+  lines.push(`Vorhandene Systeme / Datenquellen: ${fields.systems || "—"}`);
+  lines.push(`Weitere Anforderungen: ${fields.notes || "—"}`);
+  lines.push("");
+  lines.push("Bitte melden Sie sich für ein Beratungsgespräch.");
+  lines.push("");
+  lines.push("Vielen Dank.");
+  return lines.join("\n");
 }

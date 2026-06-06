@@ -17,6 +17,7 @@ import { getDeliverableIcon } from "../lib/iconMap";
 interface ConfigViewProps {
   useCaseId: string | null;
   onBack: () => void;
+  onOpenCart: () => void;
 }
 
 // Helper Text für Parameter
@@ -34,9 +35,9 @@ const parameterHelperText: Record<string, string> = {
 };
 
 /**
- * Config View - Zeigt Konfiguration für alle aktivierten Deliverables
+ * Config View - Konfiguration für alle ausgewählten Produktbausteine
  */
-export function ConfigView({ useCaseId, onBack }: ConfigViewProps) {
+export function ConfigView({ useCaseId, onBack, onOpenCart }: ConfigViewProps) {
   const selectedDeliverables = useConfigStore((state) => state.selectedDeliverables);
   const updateDeliverableParam = useConfigStore((state) => state.updateDeliverableParam);
 
@@ -53,12 +54,12 @@ export function ConfigView({ useCaseId, onBack }: ConfigViewProps) {
   if (enabledDeliverables.length === 0) {
     return (
       <div className="text-center py-12 space-y-4">
-        <p className="text-text-light dark:text-darkmode-text-light mb-2">Keine Deliverables aktiviert</p>
+        <p className="text-text-light dark:text-darkmode-text-light mb-2">Keine Produktbausteine ausgewählt</p>
         <p className="text-sm text-text-light dark:text-darkmode-text-light mb-4">
-          Bitte aktivieren Sie mindestens ein Deliverable im Schritt "Empfehlung"
+          Bitte wählen Sie mindestens einen Produktbaustein aus.
         </p>
         <Button variant="outline" onClick={onBack} size="lg">
-          ← Zurück zur Empfehlung
+          ← Zurück zu den Produktbausteinen
         </Button>
       </div>
     );
@@ -68,34 +69,20 @@ export function ConfigView({ useCaseId, onBack }: ConfigViewProps) {
     updateDeliverableParam(deliverableId, paramKey, value);
   };
 
-  const handleCopyConfig = () => {
-    const config = useConfigStore.getState();
-    const configJson = JSON.stringify({
-      selectedUseCases: config.selectedUseCases,
-      selectedDeliverables: config.selectedDeliverables,
-      totalPrice: useConfigStore.getState().getTotalPrice()
-    }, null, 2);
-
-    navigator.clipboard.writeText(configJson).then(() => {
-      // Toast würde hier kommen, für MVP: console
-      console.log('Konfiguration kopiert!');
-    });
-  };
-
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-text dark:text-darkmode-text mb-2">
+          <h2 className="text-2xl font-semibold text-text dark:text-darkmode-text mb-1.5">
             Konfiguration
           </h2>
-          <p className="text-sm text-text-light dark:text-darkmode-text-light">
-            Passen Sie die Parameter für Ihre Deliverables an. Der Preis wird automatisch aktualisiert.
+          <p className="text-sm text-text-light dark:text-darkmode-text-light max-w-xl">
+            Passen Sie die Parameter Ihrer ausgewählten Produktbausteine an. Der Preis wird automatisch aktualisiert.
           </p>
         </div>
-        <Button variant="ghost" size="sm" onClick={onBack}>
-          ← Zurück zur Empfehlung
+        <Button variant="outline" size="sm" onClick={onBack} className="shrink-0 whitespace-nowrap">
+          ← Zurück zu den Produktbausteinen
         </Button>
       </div>
 
@@ -149,7 +136,7 @@ export function ConfigView({ useCaseId, onBack }: ConfigViewProps) {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {applicableParameters.length === 0 ? (
                           <p className="text-sm text-text-light dark:text-darkmode-text-light col-span-2">
-                            Keine konfigurierbaren Parameter für dieses Deliverable.
+                            Keine konfigurierbaren Parameter für diesen Produktbaustein.
                           </p>
                         ) : (
                           applicableParameters.map((param) => {
@@ -232,10 +219,10 @@ export function ConfigView({ useCaseId, onBack }: ConfigViewProps) {
                       </div>
                     </div>
 
-                    {/* Scope & Deliverables - flach (keine verschachtelte Disclosure-Ebene) */}
+                    {/* Leistungsumfang - flach (keine verschachtelte Disclosure-Ebene) */}
                     <div className="mt-8 pt-6 border-t border-border">
                       <h4 className="text-sm font-semibold text-text dark:text-darkmode-text mb-3 uppercase tracking-wide">
-                        Scope & Deliverables
+                        Leistungsumfang
                       </h4>
                       <div className="border border-border rounded-lg bg-light/50 dark:bg-darkmode-light/50 px-4 py-4 space-y-4">
                         {/* Output Bullets */}
@@ -370,13 +357,13 @@ export function ConfigView({ useCaseId, onBack }: ConfigViewProps) {
         })}
       </Accordion>
 
-      {/* CTA Buttons */}
-      <div className="flex justify-end gap-3 pt-6 border-t border-border">
-        <Button variant="outline" onClick={handleCopyConfig} size="lg">
-          Konfiguration kopieren
+      {/* CTA – Nutzerfluss statt Entwickler-Export */}
+      <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-6 border-t border-border">
+        <Button variant="outline" onClick={onBack} size="lg" className="whitespace-nowrap">
+          Weitere Produktbausteine auswählen
         </Button>
-        <Button variant="default" onClick={onBack} size="lg">
-          Zurück zur Empfehlung
+        <Button variant="default" onClick={onOpenCart} size="lg" className="whitespace-nowrap">
+          Zum Warenkorb
         </Button>
       </div>
     </div>
